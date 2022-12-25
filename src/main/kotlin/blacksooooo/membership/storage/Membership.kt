@@ -10,9 +10,10 @@ import javax.persistence.*
 @Table(name = "membership")
 class Membership (
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     val id: Long? = 0L,
 
-    @Column(name = "membership_name", nullable = false, length = 20)
+    @Column(name = "membership_type", nullable = false, length = 20)
     @Enumerated(value = EnumType.STRING)
     val membershipType: MembershipType,
 
