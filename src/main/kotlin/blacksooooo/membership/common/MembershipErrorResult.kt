@@ -3,8 +3,10 @@ package blacksooooo.membership.common
 import org.springframework.http.HttpStatus
 
 enum class MembershipErrorResult(
-    message: String,
-    status: HttpStatus
+    val message: String,
+    val status: HttpStatus
 ) {
-    DUPLICATED_MEMBERSHIP_REGISTER("Duplicated Membership Register Request", HttpStatus.BAD_REQUEST)
+    DUPLICATED_MEMBERSHIP_REGISTER("Duplicated Membership Register Request", HttpStatus.BAD_REQUEST),
+    INVALID_PARAMETER("Invalid parameter", HttpStatus.BAD_REQUEST),
+    UNKNOWN_EXCEPTION("Unknown Exception", HttpStatus.INTERNAL_SERVER_ERROR)
 }
