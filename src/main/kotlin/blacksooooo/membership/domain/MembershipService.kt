@@ -31,4 +31,13 @@ class MembershipService(
             membershipType = savedMembership.membershipType
         )
     }
+
+    fun getMembershipList(userId: String): List<MembershipResponseDto> {
+        return membershipRepository.findAllByUserId(userId).map {
+            MembershipResponseDto(
+                id = it.id!!,
+                membershipType = it.membershipType
+            )
+        }
+    }
 }
