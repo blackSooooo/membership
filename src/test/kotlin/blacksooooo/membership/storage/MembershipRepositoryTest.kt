@@ -40,8 +40,8 @@ internal class MembershipRepositoryTest {
         val actual = membershipRepository.findByUserIdAndMembershipType("userId", MembershipType.NAVER)
 
         membership.id shouldNotBe null
-        actual.userId shouldBe "userId"
-        actual.membershipType shouldBe MembershipType.NAVER
-        actual.point shouldBe 10000
+        actual?.userId shouldBe "userId"
+        actual?.membershipType shouldBe MembershipType.NAVER
+        actual?.point shouldBe 10000
     }
 }
