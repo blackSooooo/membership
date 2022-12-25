@@ -107,6 +107,33 @@ internal class MembershipControllerTest {
         assertThat(response.id).isNotNull
     }
 
+    @Test
+    fun `멤버십 목록 조회 실패_사용자 식별값이 헤더에 없음`() {
+        val path = "/api/v1/memberships"
+
+        val request = mockMvc.perform(
+            MockMvcRequestBuilders.get(path)
+        )
+
+        request.andExpect(status().isBadRequest)
+    }
+
+    @Test
+    fun `멤버십 목록 조회 성공`() {
+        val path = "/api/v1/memberships"
+
+        every { service.getMembershipList(any()) } returns listOf(
+            MembershipResponseDto(0L, MembershipType.LINE)
+        )
+
+        val request = mockMvc.perform(
+            MockMvcRequestBuilders.get(path)
+                .header(USER_ID_HEADER, "1234")
+        )
+
+        request.andExpect(status().isOk)
+    }
+
     private fun invalidMembershipAddParameter(): Stream<Arguments> {
         return Stream.of(
             Arguments.of(-1, MembershipType.NAVER),

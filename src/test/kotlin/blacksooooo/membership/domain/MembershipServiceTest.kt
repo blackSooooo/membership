@@ -6,6 +6,7 @@ import blacksooooo.membership.fixtures.createMembership
 import blacksooooo.membership.storage.MembershipRepository
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.BehaviorSpec
+import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.clearAllMocks
@@ -51,6 +52,25 @@ internal class MembershipServiceTest: BehaviorSpec ({
                 actual.membershipType shouldBe membershipType
                 verify(exactly = 1) { repository.findByUserIdAndMembershipType(any(), any()) }
                 verify { repository.save(any()) }
+            }
+        }
+    }
+
+    Given("userId가 주어졌을 때") {
+        val userId = "userId"
+        val membership1 = createMembership(userId, MembershipType.KAKAO, 100)
+        val membership2 = createMembership(userId, MembershipType.NAVER, 100)
+        val membership3 = createMembership(userId, MembershipType.LINE, 100)
+
+        every { repository.findAllByUserId(any()) } returns listOf(
+            membership1, membership2, membership3
+        )
+
+        When("해당 정보로 조회하면") {
+            val actual = sut.getMembershipList(userId)
+
+            Then("멤버십 리스트가 반환된다.") {
+                actual shouldHaveSize 3
             }
         }
     }

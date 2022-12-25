@@ -1,6 +1,8 @@
 package blacksooooo.membership.storage
 
 import blacksooooo.membership.common.MembershipType
+import blacksooooo.membership.fixtures.createMembership
+import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import org.junit.jupiter.api.Test
@@ -43,5 +45,26 @@ internal class MembershipRepositoryTest {
         actual?.userId shouldBe "userId"
         actual?.membershipType shouldBe MembershipType.NAVER
         actual?.point shouldBe 10000
+    }
+
+    @Test
+    fun `멤버십 조회_사이즈0`() {
+        val result = membershipRepository.findAllByUserId("userId")
+
+        result shouldHaveSize 0
+    }
+
+    @Test
+    fun `멤버십 조회_사이즈2`() {
+        val userId = "userId"
+        val membership1 = createMembership(userId, MembershipType.NAVER, 100)
+        val membership2 = createMembership(userId, MembershipType.KAKAO, 100)
+
+        membershipRepository.save(membership1)
+        membershipRepository.save(membership2)
+
+        val result = membershipRepository.findAllByUserId(userId)
+
+        result shouldHaveSize 2
     }
 }
