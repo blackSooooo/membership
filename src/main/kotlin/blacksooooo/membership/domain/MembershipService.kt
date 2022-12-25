@@ -6,6 +6,7 @@ import blacksooooo.membership.exception.MembershipException
 import blacksooooo.membership.response.MembershipResponseDto
 import blacksooooo.membership.storage.Membership
 import blacksooooo.membership.storage.MembershipRepository
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 
 @Service
@@ -39,5 +40,17 @@ class MembershipService(
                 membershipType = it.membershipType
             )
         }
+    }
+
+    fun getMembership(id: Long, userId: String): MembershipResponseDto {
+        return membershipRepository.findByIdOrNull(id)?.let {
+            if (it.userId != userId) {
+                throw MembershipException(MembershipErrorResult.MEMBERSHIP_NOT_FOUND)
+            }
+            MembershipResponseDto(
+                id = it.id!!,
+                membershipType = it.membershipType
+            )
+        } ?: throw MembershipException(MembershipErrorResult.MEMBERSHIP_NOT_FOUND)
     }
 }
