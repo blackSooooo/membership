@@ -1,5 +1,6 @@
 package blacksooooo.membership.domain
 
+import blacksooooo.membership.common.MembershipErrorResult
 import blacksooooo.membership.common.MembershipType
 import blacksooooo.membership.exception.MembershipException
 import blacksooooo.membership.fixtures.createMembership
@@ -13,6 +14,8 @@ import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import org.springframework.data.repository.findByIdOrNull
+import java.util.*
 
 internal class MembershipServiceTest: BehaviorSpec ({
     val repository = mockk<MembershipRepository>()
@@ -71,6 +74,42 @@ internal class MembershipServiceTest: BehaviorSpec ({
 
             Then("멤버십 리스트가 반환된다.") {
                 actual shouldHaveSize 3
+            }
+        }
+    }
+
+    Given("멤버십이 존재하지 않을 때") {
+        every { repository.findByIdOrNull(any()) } throws MembershipException(MembershipErrorResult.MEMBERSHIP_NOT_FOUND)
+
+        When("멤버십을 조회하면") {
+            Then("예외가 발생한다.") {
+                shouldThrow<MembershipException> { sut.getMembership(0L, "userId") }
+            }
+        }
+    }
+
+    Given("멤버십이 본인의 멤버십이 아닐 때") {
+        val membership = createMembership("userId", MembershipType.NAVER, 100)
+
+        every { repository.findByIdOrNull(any()) } returns membership
+
+        When("멤버십을 조회하면") {
+            Then("예외가 발생한다.") {
+                shouldThrow<MembershipException> { sut.getMembership(1L, "anotherId") }
+            }
+        }
+    }
+
+    Given("멤버십 id, userId가 주어졌을 때") {
+        val membership = createMembership("userId", MembershipType.NAVER, 100)
+
+        every { repository.findByIdOrNull(any()) } returns membership
+
+        When("멤버십 조회를 하면") {
+            val actual = sut.getMembership(0L, "userId")
+
+            Then("해당 멤버십이 조회된다.") {
+                actual.membershipType shouldBe MembershipType.NAVER
             }
         }
     }

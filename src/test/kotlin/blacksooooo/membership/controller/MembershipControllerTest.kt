@@ -134,6 +134,51 @@ internal class MembershipControllerTest {
         request.andExpect(status().isOk)
     }
 
+    @Test
+    fun `멤버십 조회 실패_사용자 식별값이 헤더에 없음`() {
+        val path = "/api/v1/memberships/1"
+
+        val request = mockMvc.perform(
+            MockMvcRequestBuilders.get(path)
+        )
+
+        request.andExpect(status().isBadRequest)
+    }
+
+    @Test
+    fun `멤버십 조회 실패_멤버십 존재하지 않음`() {
+        val path = "/api/v1/memberships/1"
+
+        every { service.getMembership(any(), any()) } throws MembershipException(MembershipErrorResult.MEMBERSHIP_NOT_FOUND)
+
+        val request = mockMvc.perform(
+            MockMvcRequestBuilders.get(path)
+                .header(USER_ID_HEADER, "1234")
+        )
+
+        request.andExpect(status().isNotFound)
+    }
+
+    @Test
+    fun `멤버십 조회 성공`() {
+        val path = "/api/v1/memberships/1"
+
+        every { service.getMembership(any(), any()) } returns MembershipResponseDto(1, MembershipType.NAVER)
+
+        val request = mockMvc.perform(
+            MockMvcRequestBuilders.get(path)
+                .header(USER_ID_HEADER, "1234")
+        )
+
+        val response = gson.fromJson(request.andReturn()
+            .response
+            .contentAsString, MembershipResponseDto::class.java)
+
+        request.andExpect(status().isOk)
+
+        assertThat(response.membershipType).isEqualTo(MembershipType.NAVER)
+    }
+
     private fun invalidMembershipAddParameter(): Stream<Arguments> {
         return Stream.of(
             Arguments.of(-1, MembershipType.NAVER),
