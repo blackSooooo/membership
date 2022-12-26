@@ -53,4 +53,13 @@ class MembershipService(
             )
         } ?: throw MembershipException(MembershipErrorResult.MEMBERSHIP_NOT_FOUND)
     }
+
+    fun removeMembership(id: Long, userId: String) {
+        membershipRepository.findByIdOrNull(id)?.let {
+            if(it.userId != userId) {
+                throw MembershipException(MembershipErrorResult.NOT_MEMBERSHIP_OWNER)
+            }
+            membershipRepository.deleteById(id)
+        }?: throw MembershipException(MembershipErrorResult.MEMBERSHIP_NOT_FOUND)
+    }
 }

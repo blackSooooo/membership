@@ -6,6 +6,7 @@ import blacksooooo.membership.request.MembershipRequestDto
 import blacksooooo.membership.response.MembershipResponseDto
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -42,5 +43,14 @@ class MembershipController(
         @PathVariable id: Long
     ): ResponseEntity<MembershipResponseDto> {
         return ResponseEntity.ok(membershipService.getMembership(id, userId))
+    }
+
+    @DeleteMapping("/api/v1/memberships/{id}")
+    fun deleteMembership(
+        @RequestHeader(USER_ID_HEADER) userId: String,
+        @PathVariable id: Long
+    ): ResponseEntity<Boolean> {
+        return ResponseEntity.status(HttpStatus.NO_CONTENT)
+            .body(true)
     }
 }
