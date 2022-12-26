@@ -8,7 +8,9 @@ import blacksooooo.membership.exception.MembershipException
 import blacksooooo.membership.request.MembershipRequestDto
 import blacksooooo.membership.response.MembershipResponseDto
 import com.google.gson.Gson
+import io.mockk.Runs
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -194,9 +196,40 @@ internal class MembershipControllerTest {
     fun `멤버십 삭제 성공`() {
         val path = "/api/v1/memberships/1"
 
+        every { service.removeMembership(any(), any()) } just Runs
+
         val request = mockMvc.perform(
             MockMvcRequestBuilders.delete(path)
                 .header(USER_ID_HEADER, "1234")
+        )
+
+        request.andExpect(status().isNoContent)
+    }
+
+    @Test
+    fun `멤버십 적립 실패_사용자 식별값이 헤더에 없음`() {
+        val path = "/api/v1/memberships/1/accumulate"
+
+        val request = mockMvc.perform(
+            MockMvcRequestBuilders.post(path)
+                .content(gson.toJson(MembershipRequestDto(10000, MembershipType.NAVER)))
+                .contentType(MediaType.APPLICATION_JSON)
+        )
+
+        request.andExpect(status().isBadRequest)
+    }
+
+    @Test
+    fun `멤버십 적립 성공`() {
+        val path = "/api/v1/memberships/1/accumulate"
+
+        every { service.accumulateMembershipPoint(any(), any(), any()) } just Runs
+
+        val request = mockMvc.perform(
+            MockMvcRequestBuilders.post(path)
+                .header(USER_ID_HEADER, "1234")
+                .content(gson.toJson(MembershipRequestDto(10000, MembershipType.NAVER)))
+                .contentType(MediaType.APPLICATION_JSON)
         )
 
         request.andExpect(status().isNoContent)

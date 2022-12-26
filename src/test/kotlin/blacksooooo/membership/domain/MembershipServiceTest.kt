@@ -16,7 +16,9 @@ import java.util.*
 
 internal class MembershipServiceTest: BehaviorSpec ({
     val repository = mockk<MembershipRepository>()
-    val sut = MembershipService(repository)
+    val ratePointService = mockk<PointService>()
+
+    val sut = MembershipService(repository, ratePointService)
 
     Given("멤버십이 이미 존재할 때") {
         val userId = "user_id"
@@ -146,5 +148,44 @@ internal class MembershipServiceTest: BehaviorSpec ({
             }
         }
     }
+
+    Given("멤버십이 존재하지 않을 때") {
+
+        every { repository.findByIdOrNull(any()) } returns null
+
+        When("포인트 적립을 하면") {
+            Then("예외가 발생한다.") {
+                shouldThrow<MembershipException> { sut.accumulateMembershipPoint(0L, "userId", 10000)}
+            }
+        }
+    }
+
+    Given("본인의 멤버십이 아닐 때") {
+        val membership = createMembership("userId", MembershipType.NAVER, 10000)
+
+        every { repository.findByIdOrNull(any()) } returns membership
+
+        When("포인트 적립을 하면") {
+            Then("예외가 발생한다.") {
+                shouldThrow<MembershipException> { sut.accumulateMembershipPoint(0L, "myId", 10000) }
+            }
+        }
+    }
+
+    Given("amount가 주어졌을 때") {
+        val membership = createMembership("userId", MembershipType.NAVER, 10000)
+
+        every { repository.findByIdOrNull(any()) } returns membership
+        every { ratePointService.calculateAmount(any()) } returns 100
+
+        When("포인트 적립을 하면") {
+            sut.accumulateMembershipPoint(0L, "userId", 10000)
+
+            Then("포인트가 적립된다.") {
+                membership.point shouldBe 10100
+            }
+        }
+    }
+
     afterTest { clearAllMocks() }
 })
