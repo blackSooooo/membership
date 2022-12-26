@@ -50,6 +50,18 @@ class MembershipController(
         @RequestHeader(USER_ID_HEADER) userId: String,
         @PathVariable id: Long
     ): ResponseEntity<Boolean> {
+        membershipService.removeMembership(id, userId)
+        return ResponseEntity.status(HttpStatus.NO_CONTENT)
+            .body(true)
+    }
+
+    @PostMapping("/api/v1/memberships/{id}/accumulate")
+    fun accumulatePoint(
+        @RequestHeader(USER_ID_HEADER) userId: String,
+        @PathVariable id: Long,
+        @RequestBody body: MembershipRequestDto
+    ): ResponseEntity<Boolean> {
+        membershipService.accumulateMembershipPoint(id, userId, body.point)
         return ResponseEntity.status(HttpStatus.NO_CONTENT)
             .body(true)
     }

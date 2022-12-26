@@ -8,10 +8,12 @@ import blacksooooo.membership.storage.Membership
 import blacksooooo.membership.storage.MembershipRepository
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
+import javax.transaction.Transactional
 
 @Service
 class MembershipService(
-    private val membershipRepository: MembershipRepository
+    private val membershipRepository: MembershipRepository,
+    private val ratePointService: PointService
 ) {
     fun addMembership(
         userId: String,
@@ -60,6 +62,16 @@ class MembershipService(
                 throw MembershipException(MembershipErrorResult.NOT_MEMBERSHIP_OWNER)
             }
             membershipRepository.deleteById(id)
+        }?: throw MembershipException(MembershipErrorResult.MEMBERSHIP_NOT_FOUND)
+    }
+
+    @Transactional
+    fun accumulateMembershipPoint(id: Long, userId: String, amount: Int) {
+        membershipRepository.findByIdOrNull(id)?.apply {
+            if(this.userId != userId) {
+                throw MembershipException(MembershipErrorResult.NOT_MEMBERSHIP_OWNER)
+            }
+            this.point += ratePointService.calculateAmount(amount)
         }?: throw MembershipException(MembershipErrorResult.MEMBERSHIP_NOT_FOUND)
     }
 }

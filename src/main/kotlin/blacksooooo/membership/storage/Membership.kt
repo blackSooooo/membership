@@ -21,7 +21,7 @@ class Membership (
     val userId: String,
 
     @Column(name = "point", nullable = false)
-    val point: Int = 0,
+    var point: Int = 0,
 
     @Column(name = "created_at", updatable = false)
     @CreationTimestamp
