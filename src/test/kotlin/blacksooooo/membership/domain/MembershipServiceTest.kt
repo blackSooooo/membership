@@ -10,10 +10,7 @@ import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
-import io.mockk.clearAllMocks
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.verify
+import io.mockk.*
 import org.springframework.data.repository.findByIdOrNull
 import java.util.*
 
@@ -114,5 +111,40 @@ internal class MembershipServiceTest: BehaviorSpec ({
         }
     }
 
+    Given("멤버십이 존재하지 않을 때") {
+        every { repository.findByIdOrNull(any()) } returns null
+
+        When("멤버십 삭제를 하면") {
+            Then("예외가 발생한다.") {
+                shouldThrow<MembershipException> { sut.removeMembership(0L, "userId") }
+            }
+        }
+    }
+
+    Given("본인의 멤버십이 아닐 때") {
+        val membership = createMembership("userId", MembershipType.NAVER, 1000)
+
+        every { repository.findByIdOrNull(any()) } returns membership
+
+        When("멤버십 삭제를 하면") {
+            Then("예외가 발생한다.") {
+                shouldThrow<MembershipException> { sut.removeMembership(0L,"myId") }
+            }
+        }
+    }
+
+    Given("id, userId가 주어졌을 때") {
+        val membership = createMembership("userId", MembershipType.NAVER, 1000)
+
+        every { repository.findByIdOrNull(any()) } returns membership
+        every { repository.deleteById(any()) } just Runs
+
+        When("멤버십 삭제를 하면") {
+            sut.removeMembership(0L, "userId")
+            Then("해당 멤버십이 삭제 된다.") {
+                verify(exactly = 1) { repository.deleteById(any()) }
+            }
+        }
+    }
     afterTest { clearAllMocks() }
 })

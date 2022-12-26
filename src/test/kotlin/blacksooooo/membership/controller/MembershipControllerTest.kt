@@ -179,6 +179,29 @@ internal class MembershipControllerTest {
         assertThat(response.membershipType).isEqualTo(MembershipType.NAVER)
     }
 
+    @Test
+    fun `멤버십 삭제 실패_사용자 식별값이 헤더에 없음`() {
+        val path = "/api/v1/memberships/1"
+
+        val request = mockMvc.perform(
+            MockMvcRequestBuilders.delete(path)
+        )
+
+        request.andExpect(status().isBadRequest)
+    }
+
+    @Test
+    fun `멤버십 삭제 성공`() {
+        val path = "/api/v1/memberships/1"
+
+        val request = mockMvc.perform(
+            MockMvcRequestBuilders.delete(path)
+                .header(USER_ID_HEADER, "1234")
+        )
+
+        request.andExpect(status().isNoContent)
+    }
+
     private fun invalidMembershipAddParameter(): Stream<Arguments> {
         return Stream.of(
             Arguments.of(-1, MembershipType.NAVER),

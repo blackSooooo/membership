@@ -67,4 +67,13 @@ internal class MembershipRepositoryTest {
 
         result shouldHaveSize 2
     }
+
+    @Test
+    fun `멤버십 추가 후 삭제`() {
+        val membership = createMembership("userId", MembershipType.NAVER, 1000)
+
+        val savedMembership = membershipRepository.save(membership)
+
+        membershipRepository.deleteById(savedMembership.id!!)
+    }
 }
